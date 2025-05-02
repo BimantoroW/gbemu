@@ -33,7 +33,7 @@ static const char *CART_TYPES[] = {
     [0xFF] = "HuC1+RAM+BATTERY",
 };
 
-static const uint8_t *RAM_SIZES[] = {
+static const u8 RAM_SIZES[] = {
     [0x00] = 0,
     [0x02] = 8,
     [0x03] = 32,
@@ -46,8 +46,12 @@ static const char *DEST_CODES[] = {
     "Overseas"
 };
 
-cart *cart_read(const char *restrict rom) {
+cart *cart_load(const char *restrict rom) {
     FILE *fp = fopen(rom, "r");
+    if (!fp) {
+        fprintf(stderr, "Error opening rom %s\n, exiting...", rom);
+        exit(EXIT_FAILURE);
+    }
 
     // Get rom size
     fseek(fp, 0, SEEK_END);
@@ -55,18 +59,18 @@ cart *cart_read(const char *restrict rom) {
     rewind(fp);
 
     // Allocate data for the rom
-    uint8_t *rom_data = malloc(rom_size);
+    u8 *rom_data = malloc(rom_size);
     fread(rom_data, rom_size, 1, fp);
     fclose(fp);
 
     // Allocate rom
     cart *cart = malloc(sizeof(cart));
     cart->data = rom_data;
-    cart->header = rom_data + 0x100;
+    cart->header = (cart_header *)(rom_data + 0x100);
 
     // Verify checksum
-    uint8_t checksum = 0;
-    for (uint16_t address = 0x0134; address <= 0x014C; address++) {
+    u8 checksum = 0;
+    for (u16 address = 0x0134; address <= 0x014C; address++) {
         checksum = checksum - rom_data[address] - 1;
     }
 
@@ -88,4 +92,12 @@ void cart_debug(const cart *cart) {
     printf("Destination Code\t: %s\n", DEST_CODES[cart->header->dest_code]);
     printf("Version Number\t\t: 0x%02x\n", cart->header->rom_ver);
     printf("Header Checksum\t\t: 0x%02x (passed)\n", cart->header->checksum);
+}
+
+u8 cart_read(cart *cart, u16 addr) {
+    return cart->data[addr];
+}
+
+void cart_write(cart *cart, u16 addr, u8 val) {
+    cart->data[addr] = val;
 }

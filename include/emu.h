@@ -8,11 +8,10 @@
 
 typedef struct emu_gb {
     cpu *cpu;
-    mem *mem;
     cart *cart;
 } emu_gb;
 
-void emu_init(const char *restrict rom);
+void emu_init(emu_gb *emu, const char *restrict rom);
 int emu_run(const char *restrict rom);
 
 #endif

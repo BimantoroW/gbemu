@@ -29,5 +29,5 @@ $(EXE_OUT): $(MAIN_SRC) $(LIB_OUT)
 $(LIB_OUT): $(OBJ_OUT)
 	$(CC) -shared $^ -o $@
 
-$(OUT_LIB_DIR)/%.o: $(LIB_DIR)/%.c $(INCLUDE_DIR)/%.h
+$(OUT_LIB_DIR)/%.o: $(LIB_DIR)/%.c $(INCLUDES)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -fpic -o $@ $<

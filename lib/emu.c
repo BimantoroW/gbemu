@@ -3,16 +3,15 @@
 #include <stdio.h>
 #include <strings.h>
 
-emu_gb gEmu;
-
-void emu_init(const char *restrict rom) {
-    bzero(&gEmu, sizeof(emu_gb));
-    gEmu.cart = cart_read(rom);
+void emu_init(emu_gb *emu, const char *restrict rom) {
+    bzero(emu, sizeof(emu_gb));
+    emu->cart = cart_load(rom);
 }
 
 int emu_run(const char *restrict rom) {
-    emu_init(rom);
-    printf("Running %s...\n", gEmu.cart->header->title_mfr_cgb.title);
-    cart_debug(gEmu.cart);
+    emu_gb emu;
+    emu_init(&emu, rom);
+    printf("Running %s...\n", emu.cart->header->title_mfr_cgb.title);
+    cart_debug(emu.cart);
     return 0;
 }
