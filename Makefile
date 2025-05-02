@@ -2,9 +2,11 @@ SRC_DIR = src
 LIB_DIR = lib
 OUT_DIR = bin
 OUT_LIB_DIR = $(OUT_DIR)/shared
+INCLUDE_DIR = include
 
 MAIN_SRC = $(SRC_DIR)/main.c
 LIB_SRC = $(wildcard $(LIB_DIR)/*.c)
+INCLUDES = $(wildcard $(INCLUDE_DIR)/*.h)
 
 OBJ_OUT = $(patsubst $(LIB_DIR)/%.c,$(OUT_LIB_DIR)/%.o,$(LIB_SRC))
 LIB_OUT = $(OUT_LIB_DIR)/libgbemu.so
@@ -27,5 +29,5 @@ $(EXE_OUT): $(MAIN_SRC) $(LIB_OUT)
 $(LIB_OUT): $(OBJ_OUT)
 	$(CC) -shared $^ -o $@
 
-$(OUT_LIB_DIR)/%.o: $(LIB_DIR)/%.c
+$(OUT_LIB_DIR)/%.o: $(LIB_DIR)/%.c $(INCLUDE_DIR)/%.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -fpic -o $@ $<
