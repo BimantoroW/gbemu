@@ -12,7 +12,7 @@ typedef struct emu_gb {
     cart *cart;
 } emu_gb;
 
-void emu_init(void);
+void emu_init(const char *restrict rom);
 int emu_run(const char *restrict rom);
 
 #endif
