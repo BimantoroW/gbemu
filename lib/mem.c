@@ -3,16 +3,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-u8 mem_read(emu_gb *emu, u16 addr) {
+mem *mem_init(cart *cart) {
+    mem *mem = malloc(sizeof(struct mem));
+    mem->cart = cart;
+    return mem;
+}
+
+u8 mem_read(mem *mem, u16 addr) {
     if (addr < 0x8000) {
-        return cart_read(emu->cart, addr);
+        return cart_read(mem->cart, addr);
     }
     perror("mem_read");
     exit(1);
 }
-void mem_write(emu_gb *emu, u16 addr, u8 val) {
+
+void mem_write(mem *mem, u16 addr, u8 val) {
     if (addr < 0x8000) {
-        cart_write(emu->cart, addr, val);
+        cart_write(mem->cart, addr, val);
         return;
     }
     perror("mem_write");

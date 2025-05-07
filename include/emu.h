@@ -8,7 +8,7 @@
 
 typedef struct emu_gb {
     cpu *cpu;
-    cart *cart;
+    mem *mem;
 } emu_gb;
 
 void emu_init(emu_gb *emu, const char *restrict rom);
