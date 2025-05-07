@@ -14,6 +14,8 @@ void emu_init(emu_gb *emu, const char *restrict rom) {
 int emu_run(const char *restrict rom) {
     emu_gb emu;
     emu_init(&emu, rom);
+    cart_debug(emu.mem->cart);
+    puts("");
 
     while (1) {
         cpu_fetch(emu.cpu, emu.mem);

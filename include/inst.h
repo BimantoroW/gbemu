@@ -60,5 +60,6 @@ inst *inst_disass_next(u8 *code);
 const inst *inst_get(u8 opcode);
 const INST_DECODER inst_get_decoder(inst_type type);
 const INST_HANDLER inst_get_handler(inst_type type);
+const char *inst_get_name(inst_type type);
 
 #endif

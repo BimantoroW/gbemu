@@ -2,6 +2,15 @@
 #include "inst.h"
 #include <stdlib.h>
 #include <strings.h>
+#include <stdio.h>
+
+static void cpu_debug(cpu *cpu, mem *mem) {
+    printf("CPU state\n");
+    printf("    Current instruction : %s\n", inst_get_name(cpu->cur_inst->type));
+    printf("    PC                  : 0x%04hx\n", cpu->regs.pc);
+    printf("    Immediate           : 0x%04hx\n", cpu->imm_data);
+    puts("");
+}
 
 cpu *cpu_init() {
     cpu *cpu = malloc(sizeof(struct cpu));
@@ -21,6 +30,7 @@ void cpu_read_data(cpu *cpu, mem *mem) {
 }
 
 void cpu_execute(cpu *cpu, mem *mem) {
+    cpu_debug(cpu, mem);
     const INST_HANDLER handler = inst_get_handler(cpu->cur_inst->type);
     handler(cpu, mem);
 }

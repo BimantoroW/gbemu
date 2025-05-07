@@ -16,15 +16,21 @@ u16 indec_nop(cpu *cpu, mem *mem) {
     return 0;
 }
 
+u16 indec_cp(cpu *cpu, mem *mem) {
+    u8 imm = mem_read(mem, cpu->regs.pc++);
+    return imm;
+}
+
 const INST_DECODER inst_decoders[] = {
     [INS_NOP] = indec_nop,
     [INS_JMP] = indec_jmp,
+    [INS_CP] = indec_cp,
 };
 
 const INST_DECODER inst_get_decoder(inst_type type) {
     INST_DECODER decoder = inst_decoders[type];
     if (decoder == NULL) {
-        fprintf(stderr, "Decoder for instruction not yet implemented: %d\n", type);
+        fprintf(stderr, "Decoder for instruction not yet implemented: %s\n", inst_get_name(type));
         exit(1);
     }
     return decoder;
