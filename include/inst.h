@@ -3,6 +3,12 @@
 #define _INST_H_
 
 #include "util.h"
+#include "mem.h"
+
+typedef struct cpu cpu;
+
+typedef u16 (*INST_DECODER)(cpu *, mem *);
+typedef void (*INST_HANDLER)(cpu *, mem *);
 
 typedef enum inst_cond {
     COND_NONE,
@@ -37,6 +43,7 @@ typedef enum inst_type {
     INS_NONE,
     INS_NOP,
     INS_JMP,
+    INS_CP,
 } inst_type;
 
 typedef struct inst {
@@ -50,6 +57,8 @@ typedef struct inst {
 } inst;
 
 inst *inst_disass_next(u8 *code);
-const inst *get_inst(u8 opcode);
+const inst *inst_get(u8 opcode);
+const INST_DECODER inst_get_decoder(inst_type type);
+const INST_HANDLER inst_get_handler(inst_type type);
 
 #endif

@@ -3,6 +3,7 @@
 #define _CPU_H_
 
 #include "mem.h"
+#include "inst.h"
 
 typedef struct cpu_regs {
     u8 a, f, b, c, d, e, h, l;
@@ -12,12 +13,12 @@ typedef struct cpu_regs {
 typedef struct cpu {
     cpu_regs regs;
 
-    // Current instruction
-    u8 cur_opcode;
+    // Current instruction data
+    const inst *cur_inst;
     u16 imm_data;
 } cpu;
 
-void cpu_init(cpu *cpu);
+cpu *cpu_init();
 void cpu_fetch(cpu *cpu, mem *mem);
 void cpu_read_data(cpu *cpu, mem *mem);
 void cpu_execute(cpu *cpu, mem *mem);
