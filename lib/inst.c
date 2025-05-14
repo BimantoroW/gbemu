@@ -4,13 +4,15 @@
 
 // Maps opcode --> instruction
 static const inst instructions[0x100] = {
-    [0x00] = {INS_NOP, 1, 1, AM_NONE, REG_NONE, REG_NONE, COND_NONE},
-    [0xC3] = {INS_JMP, 4, 3, AM_IMM16, REG_NONE, REG_NONE, COND_NONE},
-    [0xFE] = {INS_CP, 2, 2, AM_IMM8, REG_NONE, REG_NONE, COND_NONE},
+    [0x00] = {0x00, INS_NOP, 1, 1, AM_NONE, REG_NONE, REG_NONE, COND_NONE},
+    [0x28] = {0x28, INS_JR, 3, 2, AM_REG16_IMM8, REG_PC, REG_NONE, COND_Z},
+    [0xC3] = {0xC3, INS_JMP, 4, 3, AM_REG16_IMM16, REG_PC, REG_NONE, COND_NONE},
+    [0xFE] = {0xFE, INS_CP, 2, 2, AM_REG8_IMM8, REG_A, REG_NONE, COND_NONE},
 };
 
 static const char *inst_names[] = {
     [INS_NOP] = "NOP",
+    [INS_JR] = "JR",
     [INS_JMP] = "JMP",
     [INS_CP] = "CP",
 };

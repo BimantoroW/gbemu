@@ -18,8 +18,7 @@ int emu_run(const char *restrict rom) {
     puts("");
 
     while (1) {
-        cpu_fetch(emu.cpu, emu.mem);
-        cpu_read_data(emu.cpu, emu.mem);
+        cpu_fetch_and_decode(emu.cpu, emu.mem);
         cpu_execute(emu.cpu, emu.mem);
     }
     printf("Running %s...\n", emu.mem->cart->header->title_mfr_cgb.title);
