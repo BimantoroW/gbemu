@@ -1,41 +1,36 @@
 #include "inst.h"
 #include "mem.h"
 #include "cpu.h"
+#include "inst_decoder.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-void indec_jmp(cpu *cpu, mem *mem) {
+void ins_dec_jp(cpu *cpu, mem *mem) {
     u8 low = mem_read(mem, cpu->regs.pc);
     u8 high = mem_read(mem, cpu->regs.pc + 1);
     u16 addr = (high << 8) | low;
     cpu->regs.pc += 2;
 
-    cpu->cur_data.dst_type = DST_REG16;
-    cpu->cur_data.dst.u16 = (u16 *)&cpu->regs.pc;
+    cpu->cur_data.dst_type = OP_REG16;
+    cpu->cur_data.dst = &cpu->regs.pc;
     cpu->cur_data.src_data = addr;
 }
 
-void indec_jr(cpu *cpu, mem *mem) {
-    u8 offset = mem_read(mem, cpu->regs.pc++);
-    cpu->cur_data.dst_type = DST_REG16;
-    cpu->cur_data.dst.u16 = (u16 *)&cpu->regs.pc;
-    cpu->cur_data.src_data = offset;
-}
+void ins_dec_xor(cpu *cpu, mem *mem) {
+    switch (cpu->cur_inst->src_type) {
+        case OP_REG8:
+            cpu->cur_data.src_data = *cpu_get_reg(cpu, cpu->cur_inst->src_reg);
+            break;
+        default:
+            fprintf(stderr, "NOT YEY IMPLEMENTED\n");
+            exit(1);
+            break;
+    }
 
-void indec_nop(cpu *cpu, mem *mem) {
-    cpu->cur_data.dst_type = DST_NONE;
-    cpu->cur_data.dst.u16 = NULL;
-    cpu->cur_data.src_data = 0;
-}
-
-void indec_cp(cpu *cpu, mem *mem) {
-    u8 imm;
-    switch (cpu->cur_inst->mode) {
-        case AM_REG8_IMM8:
-            imm = mem_read(mem, cpu->regs.pc++);
-            cpu->cur_data.dst_type = DST_REG8;
-            cpu->cur_data.dst.u8 = (u8 *)&cpu->regs.a;
-            cpu->cur_data.src_data = imm;
+    switch (cpu->cur_inst->dst_type) {
+        case OP_REG8:
+            cpu->cur_data.dst_type = OP_REG8;
+            cpu->cur_data.dst = cpu_get_reg(cpu, cpu->cur_inst->dst_reg);
             break;
         default:
             fprintf(stderr, "NOT YEY IMPLEMENTED\n");
@@ -44,18 +39,31 @@ void indec_cp(cpu *cpu, mem *mem) {
     }
 }
 
-const INST_DECODER inst_decoders[] = {
-    [INS_NOP] = indec_nop,
-    [INS_JR] = indec_jr,
-    [INS_JMP] = indec_jmp,
-    [INS_CP] = indec_cp,
-};
+void ins_dec_jr(cpu *cpu, mem *mem) {
+    u8 offset = mem_read(mem, cpu->regs.pc++);
+    cpu->cur_data.dst_type = OP_REG16;
+    cpu->cur_data.dst = &cpu->regs.pc;
+    cpu->cur_data.src_data = offset;
+}
 
-const INST_DECODER inst_get_decoder(inst_type type) {
-    INST_DECODER decoder = inst_decoders[type];
-    if (decoder == NULL) {
-        fprintf(stderr, "Decoder for instruction not yet implemented: %s\n", inst_get_name(type));
-        exit(1);
+void ins_dec_nop(cpu *cpu, mem *mem) {
+    cpu->cur_data.dst_type = OP_NONE;
+    cpu->cur_data.dst = NULL;
+    cpu->cur_data.src_data = 0;
+}
+
+void ins_dec_cp(cpu *cpu, mem *mem) {
+    u8 imm;
+    switch (cpu->cur_inst->src_type) {
+        case OP_IMM8:
+            imm = mem_read(mem, cpu->regs.pc++);
+            break;
+        default:
+            fprintf(stderr, "NOT YEY IMPLEMENTED\n");
+            exit(1);
+            break;
     }
-    return decoder;
+    cpu->cur_data.dst_type = OP_REG8;
+    cpu->cur_data.dst = &cpu->regs.a;
+    cpu->cur_data.src_data = imm;
 }

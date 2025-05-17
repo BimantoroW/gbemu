@@ -32,5 +32,6 @@ typedef struct cpu {
 cpu *cpu_init();
 void cpu_fetch_and_decode(cpu *cpu, mem *mem);
 void cpu_execute(cpu *cpu, mem *mem);
+u8 *cpu_get_reg(cpu *cpu, reg_type type);
 
 #endif

@@ -24,12 +24,36 @@ cpu *cpu_init() {
 void cpu_fetch_and_decode(cpu *cpu, mem *mem) {
     u8 opcode = mem_read(mem, cpu->regs.pc++);
     cpu->cur_inst = inst_get(opcode);
-    const INST_DECODER decoder = inst_get_decoder(cpu->cur_inst->type);
-    decoder(cpu, mem);
+    if (cpu->cur_inst->decoder == NULL) {
+        fprintf(stderr, "Decoder for instruction not yet implemented: %s\n", inst_get_name(cpu->cur_inst->type));
+        exit(1);
+    }
+    cpu->cur_inst->decoder(cpu, mem);
 }
 
 void cpu_execute(cpu *cpu, mem *mem) {
     cpu_debug(cpu, mem);
-    const INST_HANDLER handler = inst_get_handler(cpu->cur_inst->type);
-    handler(cpu, mem);
+    if (cpu->cur_inst->handler == NULL) {
+        fprintf(stderr, "Handler for instruction not yet implemented: %s\n", inst_get_name(cpu->cur_inst->type));
+        exit(1);
+    }
+    cpu->cur_inst->handler(cpu, mem);
+}
+
+u8 *cpu_get_reg(cpu *cpu, reg_type type) {
+    switch (type) {
+        case REG_A: return &cpu->regs.a; break;
+        case REG_F: return &cpu->regs.f; break;
+        case REG_B: return &cpu->regs.b; break;
+        case REG_C: return &cpu->regs.c; break;
+        case REG_D: return &cpu->regs.d; break;
+        case REG_E: return &cpu->regs.e; break;
+        case REG_H: return &cpu->regs.h; break;
+        case REG_L: return &cpu->regs.l; break;
+        case REG_NONE:
+        default:
+            fprintf(stderr, "INVALID REGISTER\n");
+            exit(1);
+            break;
+    }
 }

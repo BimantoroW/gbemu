@@ -14,7 +14,7 @@ EXE_OUT = $(OUT_DIR)/gbemu
 
 CC = gcc
 CPPFLAGS = -I./include/
-CFLAGS = -Wall -pedantic
+CFLAGS = -Wall -pedantic -O3
 
 all: $(EXE_OUT)
 

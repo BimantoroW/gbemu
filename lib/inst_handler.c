@@ -1,18 +1,22 @@
 #include "inst.h"
 #include "cpu.h"
 #include "mem.h"
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-void handle_jmp(cpu *cpu, mem *mem) {
+void ins_hand_jp(cpu *cpu, mem *mem) {
     cpu->regs.pc = cpu->cur_data.src_data;
 }
 
-void handle_jr(cpu *cpu, mem *mem) {
+void ins_hand_jr(cpu *cpu, mem *mem) {
     switch (cpu->cur_inst->cond) {
+        case COND_NONE:
+            cpu->regs.pc += SIGN_EXTEND(cpu->cur_data.src_data);
+            break;
         case COND_Z:
             if (CPU_GET_Z(cpu)) {
-                cpu->regs.pc += cpu->cur_data.src_data;
+                cpu->regs.pc += SIGN_EXTEND(cpu->cur_data.src_data);
             }
             break;
         default:
@@ -22,33 +26,27 @@ void handle_jr(cpu *cpu, mem *mem) {
     }
 }
 
-void handle_nop(cpu *cpu, mem *mem) {
+void ins_hand_xor(cpu *cpu, mem *mem) {
+    u8 *dst_reg = (u8 *)cpu->cur_data.dst;
+    u8 src_data = cpu->cur_data.src_data;
+    u8 res = *dst_reg ^ src_data;
+    *dst_reg = res;
+
+    u8 z = res == 0 ? 1 : 0;
+    CPU_SET_FLAGS(cpu, z, 0, 0, 0);
+}
+
+void ins_hand_nop(cpu *cpu, mem *mem) {
 
 }
 
-void handle_cp(cpu *cpu, mem *mem) {
-    u8 dst_reg = *(cpu->cur_data.dst.u8);
+void ins_hand_cp(cpu *cpu, mem *mem) {
+    u8 dst_val = *((u8 *)cpu->cur_data.dst);
     u8 src = cpu->cur_data.src_data;
 
-    u8 z = (dst_reg - src) == 0 ? 1 : 0;
+    u8 z = (dst_val - src) == 0 ? 1 : 0;
     u8 n = 1;
-    u8 h = ((dst_reg & 0xf) < (src & 0xf)) ? 1 : 0;
-    u8 c = (dst_reg < src) ? 1 : 0;
-    CPU_SET_FLAGS(cpu, z,  n, h, c);
-}
-
-const INST_HANDLER inst_handlers[] = {
-    [INS_NOP] = handle_nop,
-    [INS_JR] = handle_jr,
-    [INS_JMP] = handle_jmp,
-    [INS_CP] = handle_cp,
-};
-
-const INST_HANDLER inst_get_handler(inst_type type) {
-    INST_HANDLER handler = inst_handlers[type];
-    if (handler == NULL) {
-        fprintf(stderr, "Handler for instruction not yet implemented: %s\n", inst_get_name(type));
-        exit(1);
-    }
-    return handler;
+    u8 h = ((dst_val & 0xf) < (src & 0xf)) ? 1 : 0;
+    u8 c = (dst_val < src) ? 1 : 0;
+    CPU_SET_FLAGS(cpu, z, n, h, c);
 }

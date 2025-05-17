@@ -13,6 +13,9 @@ typedef void (*INST_HANDLER)(cpu *, mem *);
 typedef enum inst_cond {
     COND_NONE = 0,
     COND_Z,
+    COND_NZ,
+    COND_C,
+    COND_NC,
 } inst_cond;
 
 typedef enum reg_type {
@@ -29,57 +32,66 @@ typedef enum reg_type {
     REG_SP,
 } reg_type;
 
-typedef enum addr_mode {
-    AM_NONE = 0,
-    AM_REG8_REG8,
-    AM_REG8_IMM8,
-    AM_REG8_IMM16,
-    AM_REG8_MEM,
-    AM_REG16_IMM16,
-    AM_REG16_IMM8,
-    AM_MEM_IMM8,
-    AM_MEM_REG,
-} addr_mode;
+typedef enum op_type {
+    OP_NONE = 0,
+    OP_REG8,
+    OP_REG16,
+    OP_IMM8,
+    OP_IMM16,
+    OP_MEM,
+} op_type;
 
 typedef enum inst_type {
     INS_NONE = 0,
     INS_NOP,
+    INS_LD,
+    INS_INC,
+    INS_DEC,
+    INS_ADD,
+    INS_STOP,
     INS_JR,
-    INS_JMP,
+    INS_HALT,
+    INS_ADC,
+    INS_SUB,
+    INS_SBC,
+    INS_AND,
+    INS_XOR,
+    INS_OR,
     INS_CP,
+    INS_RET,
+    INS_POP,
+    INS_JP,
+    INS_CALL,
+    INS_PUSH,
+    INS_LDH
 } inst_type;
-
-typedef enum dst_type {
-    DST_NONE = 0,
-    DST_REG8,
-    DST_REG16,
-    DST_MEM,
-} dst_type;
 
 typedef struct inst {
     u8 opcode;
-    inst_type type;
+    u8 type;
     u8 cycles;
     u8 length;
-    addr_mode mode;
-    reg_type dst_reg;
-    reg_type src_reg;
-    inst_cond cond;
+
+    u8 dst_type;
+    u8 dst_reg;
+
+    u8 src_type;
+    u8 src_reg;
+
+    u8 cond;
+
+    INST_DECODER decoder;
+    INST_HANDLER handler;
 } inst;
 
 typedef struct inst_data {
-    dst_type dst_type;
-    union {
-        u16 *u16;
-        u8 *u8;
-    } dst;
+    void *dst;
+    u8 dst_type;
     u16 src_data;
 } inst_data;
 
 inst *inst_disass_next(u8 *code);
 const inst *inst_get(u8 opcode);
-const INST_DECODER inst_get_decoder(inst_type type);
-const INST_HANDLER inst_get_handler(inst_type type);
 const char *inst_get_name(inst_type type);
 
 #endif
